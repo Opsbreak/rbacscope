@@ -1,0 +1,72 @@
+# A bootstrap automation service account that was given cluster-admin
+# during cluster creation and never cleaned up, plus its legacy token
+# Secret (pre-1.24 style). Secret data is stripped from the export.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-bootstrap
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: cluster-bootstrap-token-7xk2p
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: cluster-bootstrap
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-bootstrap-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: cluster-bootstrap
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bootstrap-agent-0
+  namespace: kube-system
+spec:
+  nodeName: cp-node-1
+  serviceAccountName: cluster-bootstrap
+  containers:
+  - name: agent
+    image: example.org/bootstrap-agent:2.3
+    securityContext:
+      privileged: true
+---
+# On-call SREs may exec into kube-system pods for debugging.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: debug-exec
+  namespace: kube-system
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sre-debug-exec
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: debug-exec
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: sre-oncall

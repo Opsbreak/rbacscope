@@ -1,0 +1,67 @@
+Escalation graph: 33 nodes, 171 edges. Target: cluster-admin
+
+sa:ci/deployer -> cluster-admin  (1 hop)
+  1. sa:ci/deployer =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin
+
+user:erin -> cluster-admin  (1 hop)
+  1. user:erin =[escalate-role]=> cluster-admin
+     how: add */*/* to ClusterRole role-curator, which is bound to it by ClusterRoleBinding/erin-role-curator
+     via: ClusterRoleBinding/erin-role-curator -> ClusterRole/role-curator
+
+group:dev-team -> cluster-admin  (2 hops)
+  1. group:dev-team =[impersonate]=> group:system:masters
+     how: impersonate group system:masters (Impersonate-User + Impersonate-Group headers)
+     via: ClusterRoleBinding/dev-team-rbac-tester -> ClusterRole/rbac-tester
+  2. group:system:masters =[holds-cluster-admin]=> cluster-admin
+     how: member of system:masters (bypasses RBAC)
+
+group:sre-oncall -> cluster-admin  (2 hops)
+  1. group:sre-oncall =[exec-into-pod]=> sa:kube-system/cluster-bootstrap
+     how: exec into Pod/kube-system/bootstrap-agent-0 (runs as cluster-bootstrap, token automounted) and read /var/run/secrets/kubernetes.io/serviceaccount/token
+     via: RoleBinding/kube-system/sre-debug-exec -> Role/kube-system/debug-exec
+  2. sa:kube-system/cluster-bootstrap =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin
+
+sa:ci/gitlab-runner -> cluster-admin  (2 hops)
+  1. sa:ci/gitlab-runner =[create-pod]=> sa:ci/deployer
+     how: create a pod in namespace ci with serviceAccountName: deployer
+     via: RoleBinding/ci/gitlab-runner -> Role/ci/gitlab-runner
+  2. sa:ci/deployer =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin
+
+sa:ingress-nginx/ingress-nginx -> cluster-admin  (2 hops)
+  1. sa:ingress-nginx/ingress-nginx =[read-token-secret]=> sa:kube-system/cluster-bootstrap
+     how: read Secret kube-system/cluster-bootstrap-token-7xk2p (type service-account-token) holding a token for cluster-bootstrap
+     via: ClusterRoleBinding/ingress-nginx -> ClusterRole/ingress-nginx
+  2. sa:kube-system/cluster-bootstrap =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin
+
+sa:monitoring/prometheus -> cluster-admin  (2 hops)
+  1. sa:monitoring/prometheus =[read-token-secret]=> sa:kube-system/cluster-bootstrap
+     how: read Secret kube-system/cluster-bootstrap-token-7xk2p (type service-account-token) holding a token for cluster-bootstrap
+     via: ClusterRoleBinding/prometheus -> ClusterRole/prometheus
+  2. sa:kube-system/cluster-bootstrap =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin
+
+sa:platform/cert-approver -> cluster-admin  (2 hops)
+  1. sa:platform/cert-approver =[csr-mint-cert]=> group:system:masters
+     how: create a CSR for O=system:masters with signerName kubernetes.io/kube-apiserver-client and approve it
+     via: ClusterRoleBinding/cert-approver -> ClusterRole/csr-automation
+  2. group:system:masters =[holds-cluster-admin]=> cluster-admin
+     how: member of system:masters (bypasses RBAC)
+
+user:carol -> cluster-admin  (2 hops)
+  1. user:carol =[bind-role]=> sa:ci/deployer
+     how: create a ClusterRoleBinding of ClusterRole edit (which can create pods) to itself, then create a pod as deployer
+     via: ClusterRoleBinding/carol-rbac-manager -> ClusterRole/rbac-manager
+  2. sa:ci/deployer =[holds-cluster-admin]=> cluster-admin
+     how: holds verbs=* apiGroups=* resources=* cluster-wide
+     via: ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin
+
+9 subject(s) can reach cluster-admin.

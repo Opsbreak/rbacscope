@@ -1,0 +1,25 @@
+flowchart LR
+  n0{{"cluster-admin"}}
+  n1(["group:dev-team"])
+  n2(["group:sre-oncall"])
+  n3(["group:system:masters"])
+  n4["sa:ci/deployer"]
+  n5["sa:ci/gitlab-runner"]
+  n6["sa:ingress-nginx/ingress-nginx"]
+  n7["sa:kube-system/cluster-bootstrap"]
+  n8["sa:monitoring/prometheus"]
+  n9["sa:platform/cert-approver"]
+  n10(["user:carol"])
+  n11(["user:erin"])
+  n1 -->|impersonate| n3
+  n2 -->|exec-into-pod| n7
+  n3 -->|holds-cluster-admin| n0
+  n4 -->|holds-cluster-admin| n0
+  n5 -->|create-pod| n4
+  n6 -->|read-token-secret| n7
+  n7 -->|holds-cluster-admin| n0
+  n8 -->|read-token-secret| n7
+  n9 -->|csr-mint-cert| n3
+  n10 -->|bind-role| n4
+  n11 -->|escalate-role| n0
+  style n0 fill:#f8d7da,stroke:#c00

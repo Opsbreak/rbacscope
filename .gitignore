@@ -1,0 +1,18 @@
+# Binaries
+/rbacscope
+/rbacscope.exe
+/dist/
+*.test
+*.out
+*.prof
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Never commit real cluster exports
+/cluster-export/
+*.cluster.yaml

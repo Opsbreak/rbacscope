@@ -1,0 +1,12 @@
+Who can create pods/exec (any namespace):
+
+SUBJECT                           SCOPE           BINDING                                       ROLE                         NOTES
+user:alice                        ns/dev          RoleBinding/dev/alice-edit                    ClusterRole/edit             rule from ClusterRole/system:aggregate-to-edit
+group:sre-oncall                  ns/kube-system  RoleBinding/kube-system/sre-debug-exec        Role/kube-system/debug-exec
+group:system:masters              cluster-wide    ClusterRoleBinding/cluster-admin              ClusterRole/cluster-admin
+sa:ci/deployer                    cluster-wide    ClusterRoleBinding/ci-deployer-cluster-admin  ClusterRole/cluster-admin
+sa:ci/gitlab-runner               ns/ci           RoleBinding/ci/gitlab-runner                  Role/ci/gitlab-runner
+sa:dev/default                    ns/dev          RoleBinding/dev/default-sa-edit               ClusterRole/edit             rule from ClusterRole/system:aggregate-to-edit
+sa:kube-system/cluster-bootstrap  cluster-wide    ClusterRoleBinding/cluster-bootstrap-admin    ClusterRole/cluster-admin
+
+Members of system:masters are always allowed (the API server bypasses RBAC for them).

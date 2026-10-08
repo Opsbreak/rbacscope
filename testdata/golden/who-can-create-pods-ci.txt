@@ -1,0 +1,9 @@
+Who can create pods (namespace ci):
+
+SUBJECT                           SCOPE         BINDING                                       ROLE                       NOTES
+group:system:masters              cluster-wide  ClusterRoleBinding/cluster-admin              ClusterRole/cluster-admin
+sa:ci/deployer                    cluster-wide  ClusterRoleBinding/ci-deployer-cluster-admin  ClusterRole/cluster-admin
+sa:ci/gitlab-runner               ns/ci         RoleBinding/ci/gitlab-runner                  Role/ci/gitlab-runner
+sa:kube-system/cluster-bootstrap  cluster-wide  ClusterRoleBinding/cluster-bootstrap-admin    ClusterRole/cluster-admin
+
+Members of system:masters are always allowed (the API server bypasses RBAC for them).

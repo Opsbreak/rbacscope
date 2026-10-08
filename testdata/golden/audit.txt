@@ -1,0 +1,80 @@
+[CRITICAL] RS001 cluster-admin-equivalent  testdata/cluster/20-kube-system.yaml:19
+    ClusterRoleBinding/cluster-bootstrap-admin grants sa:kube-system/cluster-bootstrap full wildcard access (verbs=* apiGroups=* resources=*) cluster-wide via ClusterRole/cluster-admin
+[CRITICAL] RS001 cluster-admin-equivalent  testdata/cluster/40-ci.yaml:47
+    ClusterRoleBinding/ci-deployer-cluster-admin grants sa:ci/deployer full wildcard access (verbs=* apiGroups=* resources=*) cluster-wide via ClusterRole/cluster-admin
+[CRITICAL] RS003 rbac-escalate-bind  testdata/cluster/80-platform.yaml:38
+    user:erin can escalate clusterroles cluster-wide via ClusterRole/role-curator
+[CRITICAL] RS004 impersonation  testdata/cluster/60-dev.yaml:13
+    group:dev-team can impersonate users, groups cluster-wide via ClusterRole/rbac-tester
+[CRITICAL] RS005 workload-creation  testdata/cluster/40-ci.yaml:33
+    sa:ci/gitlab-runner can create pods in namespace ci via Role/ci/gitlab-runner; the namespace contains cluster-admin-equivalent service account(s) sa:ci/deployer
+[CRITICAL] RS007 nodes-proxy  testdata/cluster/50-monitoring.yaml:39
+    sa:monitoring/prometheus can get nodes/proxy cluster-wide via ClusterRole/prometheus
+[CRITICAL] RS008 secrets-read  testdata/cluster/30-ingress-nginx.yaml:42
+    sa:ingress-nginx/ingress-nginx can list/watch secrets cluster-wide via ClusterRole/ingress-nginx
+[CRITICAL] RS008 secrets-read  testdata/cluster/50-monitoring.yaml:39
+    sa:monitoring/prometheus can get/list/watch secrets cluster-wide via ClusterRole/prometheus
+[CRITICAL] RS010 csr-approve  testdata/cluster/80-platform.yaml:73
+    sa:platform/cert-approver can create certificatesigningrequests and update certificatesigningrequests/approval cluster-wide via ClusterRole/csr-automation; also holds approve on the kube-apiserver-client signer, so it can mint client certificates for any identity including system:masters
+[CRITICAL] RS011 admission-webhook-write  testdata/cluster/80-platform.yaml:101
+    sa:platform/webhook-manager can create/update/patch mutatingwebhookconfigurations cluster-wide via ClusterRole/webhook-manager
+[CRITICAL] RS013 broad-group-binding  testdata/cluster/90-legacy.json:39
+    ClusterRoleBinding/anonymous-status grants ClusterRole/public-status to unauthenticated (anonymous) requests cluster-wide
+[HIGH] RS003 rbac-escalate-bind  testdata/cluster/80-platform.yaml:16
+    user:carol can bind clusterroles cluster-wide via ClusterRole/rbac-manager (limited to resourceNames [view, edit])
+[HIGH] RS004 impersonation  testdata/cluster/60-dev.yaml:40
+    user:alice can impersonate serviceaccounts in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS004 impersonation  testdata/cluster/60-dev.yaml:54
+    sa:dev/default can impersonate serviceaccounts in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS005 workload-creation  testdata/cluster/60-dev.yaml:40
+    user:alice can create pods, create/update/patch deployments, statefulsets, daemonsets, replicasets, jobs, cronjobs, replicationcontrollers in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit); reachable service accounts: default
+[HIGH] RS005 workload-creation  testdata/cluster/60-dev.yaml:54
+    sa:dev/default can create pods, create/update/patch deployments, statefulsets, daemonsets, replicasets, jobs, cronjobs, replicationcontrollers in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit); reachable service accounts: default
+[HIGH] RS006 pod-exec-attach  testdata/cluster/20-kube-system.yaml:60
+    group:sre-oncall can create pods/exec in namespace kube-system via Role/kube-system/debug-exec
+[HIGH] RS006 pod-exec-attach  testdata/cluster/40-ci.yaml:33
+    sa:ci/gitlab-runner can create pods/exec, create pods/attach in namespace ci via Role/ci/gitlab-runner
+[HIGH] RS006 pod-exec-attach  testdata/cluster/60-dev.yaml:40
+    user:alice can create/get pods/exec, create/get pods/attach in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS006 pod-exec-attach  testdata/cluster/60-dev.yaml:54
+    sa:dev/default can create/get pods/exec, create/get pods/attach in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS008 secrets-read  testdata/cluster/30-ingress-nginx.yaml:72
+    sa:ingress-nginx/ingress-nginx can get secrets in namespace ingress-nginx via Role/ingress-nginx/ingress-nginx
+[HIGH] RS008 secrets-read  testdata/cluster/40-ci.yaml:33
+    sa:ci/gitlab-runner can get/list/watch secrets in namespace ci via Role/ci/gitlab-runner
+[HIGH] RS008 secrets-read  testdata/cluster/60-dev.yaml:40
+    user:alice can get/list/watch secrets in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS008 secrets-read  testdata/cluster/60-dev.yaml:54
+    sa:dev/default can get/list/watch secrets in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS009 serviceaccount-token-create  testdata/cluster/60-dev.yaml:40
+    user:alice can create serviceaccounts/token in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS009 serviceaccount-token-create  testdata/cluster/60-dev.yaml:54
+    sa:dev/default can create serviceaccounts/token in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)
+[HIGH] RS011 admission-webhook-write  testdata/cluster/80-platform.yaml:101
+    sa:platform/webhook-manager can create/update/patch validatingwebhookconfigurations cluster-wide via ClusterRole/webhook-manager
+[HIGH] RS012 persistentvolume-create  testdata/cluster/80-platform.yaml:132
+    sa:platform/storage-provisioner can create persistentvolumes cluster-wide via ClusterRole/pv-provisioner; a hostPath PersistentVolume exposes node filesystems
+[HIGH] RS013 broad-group-binding  testdata/cluster/90-legacy.json:77
+    ClusterRoleBinding/all-users-configmaps grants ClusterRole/configmap-reader to every authenticated identity, including every service account cluster-wide
+[HIGH] RS017 pod-runs-as-admin-sa  testdata/cluster/20-kube-system.yaml:32
+    Pod/kube-system/bootstrap-agent-0 runs as sa:kube-system/cluster-bootstrap, which is cluster-admin-equivalent, with its token automounted. The pod is also privileged or mounts hostPath volumes.
+[HIGH] RS017 pod-runs-as-admin-sa  testdata/cluster/40-ci.yaml:75
+    CronJob/ci/nightly-deploy runs as sa:ci/deployer, which is cluster-admin-equivalent, with its token automounted.
+[MEDIUM] RS002 wildcard-rule  testdata/cluster/90-legacy.json:77
+    ClusterRoleBinding/all-users-configmaps grants group:system:authenticated wildcard rules cluster-wide via ClusterRole/configmap-reader: apiGroups in {verbs=get apiGroups=* resources=*/status}
+[MEDIUM] RS009 serviceaccount-token-create  testdata/cluster/80-platform.yaml:169
+    sa:platform/token-broker can create serviceaccounts/token in namespace platform via Role/platform/token-broker (limited to resourceNames [build-bot])
+[MEDIUM] RS014 default-sa-privileged  testdata/cluster/60-dev.yaml:68
+    sa:dev/default has permissions (RoleBinding/dev/default-sa-edit -> ClusterRole/edit) and its token is automounted into Deployment/dev/legacy-web
+[LOW] RS008 secrets-read  testdata/cluster/70-payments.yaml:37
+    sa:payments/payments-api can get secrets in namespace payments via Role/payments/payments-api (limited to resourceNames [payments-db])
+[LOW] RS016 dangling-binding  testdata/cluster/90-legacy.json:5
+    RoleBinding/legacy/legacy-app-reader references ClusterRole/legacy-app-reader, which does not exist in the input; subjects sa:legacy/legacy-app would receive whatever a future role of that name grants
+[INFO] RS015 cluster-admin-inventory  testdata/cluster/10-builtin-rbac.yaml:166
+    ClusterRoleBinding/cluster-admin binds ClusterRole/cluster-admin cluster-wide to group:system:masters
+[INFO] RS015 cluster-admin-inventory  testdata/cluster/20-kube-system.yaml:19
+    ClusterRoleBinding/cluster-bootstrap-admin binds ClusterRole/cluster-admin cluster-wide to sa:kube-system/cluster-bootstrap
+[INFO] RS015 cluster-admin-inventory  testdata/cluster/40-ci.yaml:47
+    ClusterRoleBinding/ci-deployer-cluster-admin binds ClusterRole/cluster-admin cluster-wide to sa:ci/deployer
+
+39 findings: 11 critical, 20 high, 3 medium, 2 low, 3 info

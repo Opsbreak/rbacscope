@@ -1,0 +1,8 @@
+Escalation graph: 33 nodes, 171 edges. Target: sa:dev/default
+
+user:alice -> sa:dev/default  (1 hop)
+  1. user:alice =[impersonate]=> sa:dev/default
+     how: impersonate serviceaccount dev/default
+     via: RoleBinding/dev/alice-edit -> ClusterRole/edit (rule from ClusterRole/system:aggregate-to-edit)
+
+1 subject(s) can reach sa:dev/default.

@@ -1,0 +1,28 @@
+digraph rbacscope {
+  rankdir=LR;
+  node [fontname="Helvetica"];
+  edge [fontname="Helvetica", fontsize=10];
+  "cluster-admin" [shape=doubleoctagon, style=filled, fillcolor="#f8d7da"];
+  "group:dev-team" [shape=folder];
+  "group:sre-oncall" [shape=folder];
+  "group:system:masters" [shape=folder];
+  "sa:ci/deployer" [shape=box];
+  "sa:ci/gitlab-runner" [shape=box];
+  "sa:ingress-nginx/ingress-nginx" [shape=box];
+  "sa:kube-system/cluster-bootstrap" [shape=box];
+  "sa:monitoring/prometheus" [shape=box];
+  "sa:platform/cert-approver" [shape=box];
+  "user:carol" [shape=ellipse];
+  "user:erin" [shape=ellipse];
+  "group:dev-team" -> "group:system:masters" [label="impersonate"];
+  "group:sre-oncall" -> "sa:kube-system/cluster-bootstrap" [label="exec-into-pod"];
+  "group:system:masters" -> "cluster-admin" [label="holds-cluster-admin"];
+  "sa:ci/deployer" -> "cluster-admin" [label="holds-cluster-admin"];
+  "sa:ci/gitlab-runner" -> "sa:ci/deployer" [label="create-pod"];
+  "sa:ingress-nginx/ingress-nginx" -> "sa:kube-system/cluster-bootstrap" [label="read-token-secret"];
+  "sa:kube-system/cluster-bootstrap" -> "cluster-admin" [label="holds-cluster-admin"];
+  "sa:monitoring/prometheus" -> "sa:kube-system/cluster-bootstrap" [label="read-token-secret"];
+  "sa:platform/cert-approver" -> "group:system:masters" [label="csr-mint-cert"];
+  "user:carol" -> "sa:ci/deployer" [label="bind-role"];
+  "user:erin" -> "cluster-admin" [label="escalate-role"];
+}

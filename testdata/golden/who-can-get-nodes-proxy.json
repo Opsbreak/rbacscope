@@ -1,0 +1,106 @@
+{
+  "request": "get nodes/proxy",
+  "scope": "cluster-scoped request",
+  "results": [
+    {
+      "subject": {
+        "kind": "Group",
+        "apiGroup": "rbac.authorization.k8s.io",
+        "name": "system:masters"
+      },
+      "scope": "cluster-wide",
+      "binding": "ClusterRoleBinding/cluster-admin",
+      "bindingSource": {
+        "file": "testdata/cluster/10-builtin-rbac.yaml",
+        "line": 166
+      },
+      "role": "ClusterRole/cluster-admin",
+      "rule": {
+        "verbs": [
+          "*"
+        ],
+        "apiGroups": [
+          "*"
+        ],
+        "resources": [
+          "*"
+        ]
+      }
+    },
+    {
+      "subject": {
+        "kind": "ServiceAccount",
+        "name": "deployer",
+        "namespace": "ci"
+      },
+      "scope": "cluster-wide",
+      "binding": "ClusterRoleBinding/ci-deployer-cluster-admin",
+      "bindingSource": {
+        "file": "testdata/cluster/40-ci.yaml",
+        "line": 47
+      },
+      "role": "ClusterRole/cluster-admin",
+      "rule": {
+        "verbs": [
+          "*"
+        ],
+        "apiGroups": [
+          "*"
+        ],
+        "resources": [
+          "*"
+        ]
+      }
+    },
+    {
+      "subject": {
+        "kind": "ServiceAccount",
+        "name": "cluster-bootstrap",
+        "namespace": "kube-system"
+      },
+      "scope": "cluster-wide",
+      "binding": "ClusterRoleBinding/cluster-bootstrap-admin",
+      "bindingSource": {
+        "file": "testdata/cluster/20-kube-system.yaml",
+        "line": 19
+      },
+      "role": "ClusterRole/cluster-admin",
+      "rule": {
+        "verbs": [
+          "*"
+        ],
+        "apiGroups": [
+          "*"
+        ],
+        "resources": [
+          "*"
+        ]
+      }
+    },
+    {
+      "subject": {
+        "kind": "ServiceAccount",
+        "name": "prometheus",
+        "namespace": "monitoring"
+      },
+      "scope": "cluster-wide",
+      "binding": "ClusterRoleBinding/prometheus",
+      "bindingSource": {
+        "file": "testdata/cluster/50-monitoring.yaml",
+        "line": 39
+      },
+      "role": "ClusterRole/prometheus",
+      "rule": {
+        "verbs": [
+          "get"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "nodes/proxy"
+        ]
+      }
+    }
+  ]
+}

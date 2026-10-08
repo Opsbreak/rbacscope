@@ -1,0 +1,20 @@
+ID     SEVERITY  NAME                         TITLE
+RS001  critical  cluster-admin-equivalent     Binding grants full wildcard access (*/*/*)
+RS002  medium    wildcard-rule                Rule uses wildcards for verbs, resources or API groups
+RS003  critical  rbac-escalate-bind           Subject can escalate or bind roles
+RS004  critical  impersonation                Subject can impersonate other identities
+RS005  high      workload-creation            Subject can create pods or modify workloads
+RS006  high      pod-exec-attach              Subject can exec/attach into pods
+RS007  critical  nodes-proxy                  Subject can access the kubelet API via nodes/proxy
+RS008  high      secrets-read                 Subject can read secrets
+RS009  high      serviceaccount-token-create  Subject can mint service account tokens
+RS010  critical  csr-approve                  Subject can create and approve certificate signing requests
+RS011  high      admission-webhook-write      Subject can modify admission webhook configurations
+RS012  high      persistentvolume-create      Subject can create PersistentVolumes
+RS013  high      broad-group-binding          Binding grants permissions to all (un)authenticated users or all service accounts
+RS014  medium    default-sa-privileged        Namespace default service account has permissions and is automounted
+RS015  info      cluster-admin-inventory      cluster-admin binding inventory
+RS016  low       dangling-binding             Binding references a role that does not exist
+RS017  high      pod-runs-as-admin-sa         Workload runs with a cluster-admin-equivalent service account token
+
+Severity shown is the default; actual severity depends on scope (cluster-wide vs namespace) and resourceNames restrictions.

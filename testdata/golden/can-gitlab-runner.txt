@@ -1,0 +1,14 @@
+Subject:  sa:ci/gitlab-runner
+Username: system:serviceaccount:ci:gitlab-runner
+Groups:   system:serviceaccounts, system:serviceaccounts:ci, system:authenticated
+Cluster-admin equivalent: no
+
+SCOPE         VERBS                                      APIGROUPS             RESOURCES                                                                                       NAMES  GRANTED BY
+cluster-wide  get,list,watch                             ""                    configmaps                                                                                      -      ClusterRoleBinding/all-users-configmaps -> ClusterRole/configmap-reader [as group:system:authenticated]
+cluster-wide  get                                        *                     */status                                                                                        -      ClusterRoleBinding/all-users-configmaps -> ClusterRole/configmap-reader [as group:system:authenticated]
+cluster-wide  create                                     authorization.k8s.io  selfsubjectaccessreviews,selfsubjectrulesreviews                                                -      ClusterRoleBinding/system:basic-user -> ClusterRole/system:basic-user [as group:system:authenticated]
+cluster-wide  get                                        -                     urls: /api,/api/*,/apis,/apis/*,/healthz,/livez,/openapi,/openapi/*,/readyz,/version,/version/  -      ClusterRoleBinding/system:discovery -> ClusterRole/system:discovery [as group:system:authenticated]
+cluster-wide  get                                        -                     urls: /healthz,/livez,/readyz,/version,/version/                                                -      ClusterRoleBinding/system:public-info-viewer -> ClusterRole/system:public-info-viewer [as group:system:authenticated]
+ns/ci         get,list,watch,create,patch,update,delete  ""                    pods,secrets,configmaps                                                                         -      RoleBinding/ci/gitlab-runner -> Role/ci/gitlab-runner
+ns/ci         create,patch,delete                        ""                    pods/exec,pods/attach                                                                           -      RoleBinding/ci/gitlab-runner -> Role/ci/gitlab-runner
+ns/ci         get                                        ""                    pods/log                                                                                        -      RoleBinding/ci/gitlab-runner -> Role/ci/gitlab-runner

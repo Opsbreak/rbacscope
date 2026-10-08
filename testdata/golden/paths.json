@@ -1,0 +1,231 @@
+{
+  "target": "cluster-admin",
+  "nodes": 33,
+  "edges": 171,
+  "paths": [
+    {
+      "source": {
+        "kind": "ServiceAccount",
+        "name": "deployer",
+        "namespace": "ci"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "sa:ci/deployer",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "User",
+        "name": "erin"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "user:erin",
+          "to": "cluster-admin",
+          "technique": "escalate-role",
+          "detail": "add */*/* to ClusterRole role-curator, which is bound to it by ClusterRoleBinding/erin-role-curator",
+          "evidence": [
+            "ClusterRoleBinding/erin-role-curator -> ClusterRole/role-curator"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "Group",
+        "name": "dev-team"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "group:dev-team",
+          "to": "group:system:masters",
+          "technique": "impersonate",
+          "detail": "impersonate group system:masters (Impersonate-User + Impersonate-Group headers)",
+          "evidence": [
+            "ClusterRoleBinding/dev-team-rbac-tester -> ClusterRole/rbac-tester"
+          ]
+        },
+        {
+          "from": "group:system:masters",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "member of system:masters (bypasses RBAC)"
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "Group",
+        "name": "sre-oncall"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "group:sre-oncall",
+          "to": "sa:kube-system/cluster-bootstrap",
+          "technique": "exec-into-pod",
+          "detail": "exec into Pod/kube-system/bootstrap-agent-0 (runs as cluster-bootstrap, token automounted) and read /var/run/secrets/kubernetes.io/serviceaccount/token",
+          "evidence": [
+            "RoleBinding/kube-system/sre-debug-exec -> Role/kube-system/debug-exec"
+          ]
+        },
+        {
+          "from": "sa:kube-system/cluster-bootstrap",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "ServiceAccount",
+        "name": "gitlab-runner",
+        "namespace": "ci"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "sa:ci/gitlab-runner",
+          "to": "sa:ci/deployer",
+          "technique": "create-pod",
+          "detail": "create a pod in namespace ci with serviceAccountName: deployer",
+          "evidence": [
+            "RoleBinding/ci/gitlab-runner -> Role/ci/gitlab-runner"
+          ]
+        },
+        {
+          "from": "sa:ci/deployer",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "ServiceAccount",
+        "name": "ingress-nginx",
+        "namespace": "ingress-nginx"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "sa:ingress-nginx/ingress-nginx",
+          "to": "sa:kube-system/cluster-bootstrap",
+          "technique": "read-token-secret",
+          "detail": "read Secret kube-system/cluster-bootstrap-token-7xk2p (type service-account-token) holding a token for cluster-bootstrap",
+          "evidence": [
+            "ClusterRoleBinding/ingress-nginx -> ClusterRole/ingress-nginx"
+          ]
+        },
+        {
+          "from": "sa:kube-system/cluster-bootstrap",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "ServiceAccount",
+        "name": "prometheus",
+        "namespace": "monitoring"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "sa:monitoring/prometheus",
+          "to": "sa:kube-system/cluster-bootstrap",
+          "technique": "read-token-secret",
+          "detail": "read Secret kube-system/cluster-bootstrap-token-7xk2p (type service-account-token) holding a token for cluster-bootstrap",
+          "evidence": [
+            "ClusterRoleBinding/prometheus -> ClusterRole/prometheus"
+          ]
+        },
+        {
+          "from": "sa:kube-system/cluster-bootstrap",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/cluster-bootstrap-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "ServiceAccount",
+        "name": "cert-approver",
+        "namespace": "platform"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "sa:platform/cert-approver",
+          "to": "group:system:masters",
+          "technique": "csr-mint-cert",
+          "detail": "create a CSR for O=system:masters with signerName kubernetes.io/kube-apiserver-client and approve it",
+          "evidence": [
+            "ClusterRoleBinding/cert-approver -> ClusterRole/csr-automation"
+          ]
+        },
+        {
+          "from": "group:system:masters",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "member of system:masters (bypasses RBAC)"
+        }
+      ]
+    },
+    {
+      "source": {
+        "kind": "User",
+        "name": "carol"
+      },
+      "target": "cluster-admin",
+      "hops": [
+        {
+          "from": "user:carol",
+          "to": "sa:ci/deployer",
+          "technique": "bind-role",
+          "detail": "create a ClusterRoleBinding of ClusterRole edit (which can create pods) to itself, then create a pod as deployer",
+          "evidence": [
+            "ClusterRoleBinding/carol-rbac-manager -> ClusterRole/rbac-manager"
+          ]
+        },
+        {
+          "from": "sa:ci/deployer",
+          "to": "cluster-admin",
+          "technique": "holds-cluster-admin",
+          "detail": "holds verbs=* apiGroups=* resources=* cluster-wide",
+          "evidence": [
+            "ClusterRoleBinding/ci-deployer-cluster-admin -> ClusterRole/cluster-admin"
+          ]
+        }
+      ]
+    }
+  ]
+}

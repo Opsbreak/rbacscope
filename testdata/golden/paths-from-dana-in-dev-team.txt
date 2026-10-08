@@ -1,0 +1,10 @@
+Escalation graph: 34 nodes, 208 edges. Target: cluster-admin
+
+user:dana -> cluster-admin  (2 hops)
+  1. user:dana =[impersonate]=> group:system:masters
+     how: impersonate group system:masters (Impersonate-User + Impersonate-Group headers)
+     via: ClusterRoleBinding/dev-team-rbac-tester -> ClusterRole/rbac-tester
+  2. group:system:masters =[holds-cluster-admin]=> cluster-admin
+     how: member of system:masters (bypasses RBAC)
+
+1 subject(s) can reach cluster-admin.

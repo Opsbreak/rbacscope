@@ -1,0 +1,370 @@
+{
+  "subject": "user:alice",
+  "username": "alice",
+  "groups": [
+    "system:authenticated"
+  ],
+  "clusterAdminEquivalent": false,
+  "permissions": [
+    {
+      "scope": "cluster-wide",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "configmaps"
+        ]
+      },
+      "binding": "ClusterRoleBinding/all-users-configmaps",
+      "role": "ClusterRole/configmap-reader",
+      "via": "group:system:authenticated"
+    },
+    {
+      "scope": "cluster-wide",
+      "rule": {
+        "verbs": [
+          "get"
+        ],
+        "apiGroups": [
+          "*"
+        ],
+        "resources": [
+          "*/status"
+        ]
+      },
+      "binding": "ClusterRoleBinding/all-users-configmaps",
+      "role": "ClusterRole/configmap-reader",
+      "via": "group:system:authenticated"
+    },
+    {
+      "scope": "cluster-wide",
+      "rule": {
+        "verbs": [
+          "create"
+        ],
+        "apiGroups": [
+          "authorization.k8s.io"
+        ],
+        "resources": [
+          "selfsubjectaccessreviews",
+          "selfsubjectrulesreviews"
+        ]
+      },
+      "binding": "ClusterRoleBinding/system:basic-user",
+      "role": "ClusterRole/system:basic-user",
+      "via": "group:system:authenticated"
+    },
+    {
+      "scope": "cluster-wide",
+      "rule": {
+        "verbs": [
+          "get"
+        ],
+        "nonResourceURLs": [
+          "/api",
+          "/api/*",
+          "/apis",
+          "/apis/*",
+          "/healthz",
+          "/livez",
+          "/openapi",
+          "/openapi/*",
+          "/readyz",
+          "/version",
+          "/version/"
+        ]
+      },
+      "binding": "ClusterRoleBinding/system:discovery",
+      "role": "ClusterRole/system:discovery",
+      "via": "group:system:authenticated"
+    },
+    {
+      "scope": "cluster-wide",
+      "rule": {
+        "verbs": [
+          "get"
+        ],
+        "nonResourceURLs": [
+          "/healthz",
+          "/livez",
+          "/readyz",
+          "/version",
+          "/version/"
+        ]
+      },
+      "binding": "ClusterRoleBinding/system:public-info-viewer",
+      "role": "ClusterRole/system:public-info-viewer",
+      "via": "group:system:authenticated"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "pods/attach",
+          "pods/exec",
+          "pods/portforward",
+          "pods/proxy",
+          "secrets",
+          "services/proxy"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "impersonate"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "serviceaccounts"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "create",
+          "delete",
+          "deletecollection",
+          "patch",
+          "update"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "pods",
+          "pods/attach",
+          "pods/exec",
+          "pods/portforward",
+          "pods/proxy"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "create",
+          "delete",
+          "deletecollection",
+          "patch",
+          "update"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "configmaps",
+          "persistentvolumeclaims",
+          "replicationcontrollers",
+          "replicationcontrollers/scale",
+          "secrets",
+          "serviceaccounts",
+          "services",
+          "services/proxy"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "create"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "serviceaccounts/token"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "create",
+          "delete",
+          "deletecollection",
+          "patch",
+          "update"
+        ],
+        "apiGroups": [
+          "apps"
+        ],
+        "resources": [
+          "daemonsets",
+          "deployments",
+          "deployments/rollback",
+          "deployments/scale",
+          "replicasets",
+          "replicasets/scale",
+          "statefulsets",
+          "statefulsets/scale"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "create",
+          "delete",
+          "deletecollection",
+          "patch",
+          "update"
+        ],
+        "apiGroups": [
+          "batch"
+        ],
+        "resources": [
+          "cronjobs",
+          "jobs"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-edit",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "configmaps",
+          "endpoints",
+          "persistentvolumeclaims",
+          "pods",
+          "pods/log",
+          "pods/status",
+          "replicationcontrollers",
+          "serviceaccounts",
+          "services"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-view",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          ""
+        ],
+        "resources": [
+          "events",
+          "limitranges",
+          "namespaces",
+          "namespaces/status",
+          "resourcequotas"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-view",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          "apps"
+        ],
+        "resources": [
+          "daemonsets",
+          "deployments",
+          "replicasets",
+          "statefulsets"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-view",
+      "via": "user:alice"
+    },
+    {
+      "scope": "ns/dev",
+      "rule": {
+        "verbs": [
+          "get",
+          "list",
+          "watch"
+        ],
+        "apiGroups": [
+          "batch"
+        ],
+        "resources": [
+          "cronjobs",
+          "jobs"
+        ]
+      },
+      "binding": "RoleBinding/dev/alice-edit",
+      "role": "ClusterRole/edit",
+      "ruleFrom": "ClusterRole/system:aggregate-to-view",
+      "via": "user:alice"
+    }
+  ]
+}

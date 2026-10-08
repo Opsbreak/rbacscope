@@ -1,0 +1,42 @@
+# Exported with: kubectl get namespaces -o yaml
+apiVersion: v1
+kind: List
+metadata:
+  resourceVersion: ""
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: kube-system
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: default
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: ingress-nginx
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: ci
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: monitoring
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: dev
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: payments
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: platform
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: legacy

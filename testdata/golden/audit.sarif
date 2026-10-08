@@ -1,0 +1,2207 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "rbacscope",
+          "version": "0.1.0",
+          "informationUri": "https://github.com/Opsbreak/rbacscope",
+          "rules": [
+            {
+              "id": "RS001",
+              "name": "cluster-admin-equivalent",
+              "shortDescription": {
+                "text": "Binding grants full wildcard access (*/*/*)"
+              },
+              "fullDescription": {
+                "text": "The bound role allows every verb on every resource in every API group. Through a ClusterRoleBinding this is cluster-admin; through a RoleBinding it is full control of the namespace, including its secrets and service accounts."
+              },
+              "help": {
+                "text": "The bound role allows every verb on every resource in every API group. Through a ClusterRoleBinding this is cluster-admin; through a RoleBinding it is full control of the namespace, including its secrets and service accounts.\n\nRemediation: Replace the wildcard rule with the specific verbs/resources required. Reserve cluster-admin for break-glass identities and bind it through short-lived, audited access."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "9.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS002",
+              "name": "wildcard-rule",
+              "shortDescription": {
+                "text": "Rule uses wildcards for verbs, resources or API groups"
+              },
+              "fullDescription": {
+                "text": "Wildcards automatically extend to subresources, new verbs and resources added by CRDs or future Kubernetes versions, so the effective permission silently grows over time."
+              },
+              "help": {
+                "text": "Wildcards automatically extend to subresources, new verbs and resources added by CRDs or future Kubernetes versions, so the effective permission silently grows over time.\n\nRemediation: Enumerate the verbs, apiGroups and resources explicitly."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "5.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS003",
+              "name": "rbac-escalate-bind",
+              "shortDescription": {
+                "text": "Subject can escalate or bind roles"
+              },
+              "fullDescription": {
+                "text": "The escalate verb lets a subject create or update roles containing permissions it does not hold; bind lets it create bindings to roles it does not hold. Either bypasses RBAC privilege-escalation prevention (e.g. binding itself to cluster-admin)."
+              },
+              "help": {
+                "text": "The escalate verb lets a subject create or update roles containing permissions it does not hold; bind lets it create bindings to roles it does not hold. Either bypasses RBAC privilege-escalation prevention (e.g. binding itself to cluster-admin).\n\nRemediation: Remove escalate/bind. If delegation is required, restrict bind with resourceNames to the specific low-privilege roles that may be delegated."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "9.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS004",
+              "name": "impersonation",
+              "shortDescription": {
+                "text": "Subject can impersonate other identities"
+              },
+              "fullDescription": {
+                "text": "impersonate on users, groups, uids or serviceaccounts lets the subject act as any of those identities, e.g. as a member of system:masters."
+              },
+              "help": {
+                "text": "impersonate on users, groups, uids or serviceaccounts lets the subject act as any of those identities, e.g. as a member of system:masters.\n\nRemediation: Remove impersonate or restrict it with resourceNames to specific, low-privilege identities."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "9.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS005",
+              "name": "workload-creation",
+              "shortDescription": {
+                "text": "Subject can create pods or modify workloads"
+              },
+              "fullDescription": {
+                "text": "Anyone who can create pods (directly or through Deployments, DaemonSets, Jobs, ...) in a namespace can run a pod as ANY service account in that namespace and read its token, inheriting all of that service account's permissions. They can also mount secrets and configmaps of the namespace."
+              },
+              "help": {
+                "text": "Anyone who can create pods (directly or through Deployments, DaemonSets, Jobs, ...) in a namespace can run a pod as ANY service account in that namespace and read its token, inheriting all of that service account's permissions. They can also mount secrets and configmaps of the namespace.\n\nRemediation: Grant workload creation only in namespaces whose service accounts are no more privileged than the subject. Keep privileged service accounts in dedicated namespaces; enforce Pod Security Admission and an admission policy restricting serviceAccountName."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS006",
+              "name": "pod-exec-attach",
+              "shortDescription": {
+                "text": "Subject can exec/attach into pods"
+              },
+              "fullDescription": {
+                "text": "pods/exec and pods/attach give a shell in running containers and therefore access to their mounted service account tokens, secrets and network position. (On clusters before 1.31, get on pods/exec also permits exec over WebSocket.)"
+              },
+              "help": {
+                "text": "pods/exec and pods/attach give a shell in running containers and therefore access to their mounted service account tokens, secrets and network position. (On clusters before 1.31, get on pods/exec also permits exec over WebSocket.)\n\nRemediation: Remove pods/exec and pods/attach from routine roles; use just-in-time access for debugging."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS007",
+              "name": "nodes-proxy",
+              "shortDescription": {
+                "text": "Subject can access the kubelet API via nodes/proxy"
+              },
+              "fullDescription": {
+                "text": "nodes/proxy reaches the kubelet API, which allows running commands in any pod on the node and bypasses API server audit logging and admission."
+              },
+              "help": {
+                "text": "nodes/proxy reaches the kubelet API, which allows running commands in any pod on the node and bypasses API server audit logging and admission.\n\nRemediation: Remove nodes/proxy. Monitoring agents should use the /metrics endpoints via nodes/metrics or the metrics API instead."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "9.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS008",
+              "name": "secrets-read",
+              "shortDescription": {
+                "text": "Subject can read secrets"
+              },
+              "fullDescription": {
+                "text": "get/list/watch on secrets exposes credentials, including legacy service account tokens. Note that list and watch return full secret contents. Cluster-wide read is equivalent to obtaining every credential stored in the cluster."
+              },
+              "help": {
+                "text": "get/list/watch on secrets exposes credentials, including legacy service account tokens. Note that list and watch return full secret contents. Cluster-wide read is equivalent to obtaining every credential stored in the cluster.\n\nRemediation: Restrict secret access to specific namespaces and, where possible, specific resourceNames with get only."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS009",
+              "name": "serviceaccount-token-create",
+              "shortDescription": {
+                "text": "Subject can mint service account tokens"
+              },
+              "fullDescription": {
+                "text": "create on serviceaccounts/token issues a bound token for a service account, granting all of its permissions."
+              },
+              "help": {
+                "text": "create on serviceaccounts/token issues a bound token for a service account, granting all of its permissions.\n\nRemediation: Remove serviceaccounts/token create or restrict it with resourceNames."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS010",
+              "name": "csr-approve",
+              "shortDescription": {
+                "text": "Subject can create and approve certificate signing requests"
+              },
+              "fullDescription": {
+                "text": "create on certificatesigningrequests plus update on certificatesigningrequests/approval (and approve on the kube-apiserver-client signer) lets the subject mint client certificates for any user or group, including system:masters."
+              },
+              "help": {
+                "text": "create on certificatesigningrequests plus update on certificatesigningrequests/approval (and approve on the kube-apiserver-client signer) lets the subject mint client certificates for any user or group, including system:masters.\n\nRemediation: Separate CSR creation and approval duties; restrict approve on signers to specific signerNames via resourceNames."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "9.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS011",
+              "name": "admission-webhook-write",
+              "shortDescription": {
+                "text": "Subject can modify admission webhook configurations"
+              },
+              "fullDescription": {
+                "text": "Mutating webhooks can inject containers, service accounts or privileged settings into every pod created in the cluster; validating webhooks receive every admitted object, including secrets, and can deny traffic."
+              },
+              "help": {
+                "text": "Mutating webhooks can inject containers, service accounts or privileged settings into every pod created in the cluster; validating webhooks receive every admitted object, including secrets, and can deny traffic.\n\nRemediation: Limit webhook configuration writes to the deployment pipeline identity."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS012",
+              "name": "persistentvolume-create",
+              "shortDescription": {
+                "text": "Subject can create PersistentVolumes"
+              },
+              "fullDescription": {
+                "text": "A PersistentVolume can point at a hostPath on a node; binding it to a claim gives pods access to the node filesystem regardless of Pod Security settings on hostPath volumes."
+              },
+              "help": {
+                "text": "A PersistentVolume can point at a hostPath on a node; binding it to a claim gives pods access to the node filesystem regardless of Pod Security settings on hostPath volumes.\n\nRemediation: Use dynamic provisioning through StorageClasses and remove create on persistentvolumes."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS013",
+              "name": "broad-group-binding",
+              "shortDescription": {
+                "text": "Binding grants permissions to all (un)authenticated users or all service accounts"
+              },
+              "fullDescription": {
+                "text": "Subjects system:unauthenticated / system:anonymous apply to anyone who can reach the API server; system:authenticated applies to every identity including every service account in the cluster; system:serviceaccounts applies to every service account."
+              },
+              "help": {
+                "text": "Subjects system:unauthenticated / system:anonymous apply to anyone who can reach the API server; system:authenticated applies to every identity including every service account in the cluster; system:serviceaccounts applies to every service account.\n\nRemediation: Bind to specific users, groups or service accounts."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS014",
+              "name": "default-sa-privileged",
+              "shortDescription": {
+                "text": "Namespace default service account has permissions and is automounted"
+              },
+              "fullDescription": {
+                "text": "Pods that do not set serviceAccountName run as \"default\". When that service account has RBAC permissions and the token is automounted, every such pod receives them."
+              },
+              "help": {
+                "text": "Pods that do not set serviceAccountName run as \"default\". When that service account has RBAC permissions and the token is automounted, every such pod receives them.\n\nRemediation: Create a dedicated service account per workload, remove bindings from \"default\", and set automountServiceAccountToken: false on the default service account."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "5.5",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS015",
+              "name": "cluster-admin-inventory",
+              "shortDescription": {
+                "text": "cluster-admin binding inventory"
+              },
+              "fullDescription": {
+                "text": "Inventory of every binding to the cluster-admin ClusterRole (or an equivalent */*/* role), including built-in ones, for review."
+              },
+              "help": {
+                "text": "Inventory of every binding to the cluster-admin ClusterRole (or an equivalent */*/* role), including built-in ones, for review.\n\nRemediation: Review periodically; every entry should be expected and owned."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "1.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS016",
+              "name": "dangling-binding",
+              "shortDescription": {
+                "text": "Binding references a role that does not exist"
+              },
+              "fullDescription": {
+                "text": "The binding grants nothing today, but whoever later creates a role with that name silently grants it to the binding's subjects."
+              },
+              "help": {
+                "text": "The binding grants nothing today, but whoever later creates a role with that name silently grants it to the binding's subjects.\n\nRemediation: Delete the binding or create the intended role."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "3.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "RS017",
+              "name": "pod-runs-as-admin-sa",
+              "shortDescription": {
+                "text": "Workload runs with a cluster-admin-equivalent service account token"
+              },
+              "fullDescription": {
+                "text": "The pod mounts a token for a service account that is cluster-admin-equivalent. Compromise of any container in the pod (RCE, SSRF to the token file, exec) is full cluster compromise."
+              },
+              "help": {
+                "text": "The pod mounts a token for a service account that is cluster-admin-equivalent. Compromise of any container in the pod (RCE, SSRF to the token file, exec) is full cluster compromise.\n\nRemediation: Give the workload a least-privilege service account, or disable automountServiceAccountToken if it does not call the API."
+              },
+              "helpUri": "https://github.com/Opsbreak/rbacscope#audit-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "kubernetes",
+                  "rbac"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "RS001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "ClusterRoleBinding/cluster-bootstrap-admin grants sa:kube-system/cluster-bootstrap full wildcard access (verbs=* apiGroups=* resources=*) cluster-wide via ClusterRole/cluster-admin"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/20-kube-system.yaml"
+                },
+                "region": {
+                  "startLine": 19
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/cluster-admin"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "60b7b512eb740cbb"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:kube-system/cluster-bootstrap"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "ClusterRoleBinding/ci-deployer-cluster-admin grants sa:ci/deployer full wildcard access (verbs=* apiGroups=* resources=*) cluster-wide via ClusterRole/cluster-admin"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 47
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/cluster-admin"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "dbbab698b3a8b784"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:ci/deployer"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS003",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "user:erin can escalate clusterroles cluster-wide via ClusterRole/role-curator"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 38
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/role-curator"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "8f36a24bb09627b3"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "user:erin"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS004",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "group:dev-team can impersonate users, groups cluster-wide via ClusterRole/rbac-tester"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/rbac-tester"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "9e3414455c67b366"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "group:dev-team"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS005",
+          "ruleIndex": 4,
+          "level": "error",
+          "message": {
+            "text": "sa:ci/gitlab-runner can create pods in namespace ci via Role/ci/gitlab-runner; the namespace contains cluster-admin-equivalent service account(s) sa:ci/deployer"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 17
+                }
+              },
+              "message": {
+                "text": "role Role/ci/gitlab-runner"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "7ecd7408167133a7"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:ci/gitlab-runner"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS007",
+          "ruleIndex": 6,
+          "level": "error",
+          "message": {
+            "text": "sa:monitoring/prometheus can get nodes/proxy cluster-wide via ClusterRole/prometheus"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/50-monitoring.yaml"
+                },
+                "region": {
+                  "startLine": 39
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/50-monitoring.yaml"
+                },
+                "region": {
+                  "startLine": 22
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/prometheus"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "d4f7623dcf4d20ab"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:monitoring/prometheus"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "sa:ingress-nginx/ingress-nginx can list/watch secrets cluster-wide via ClusterRole/ingress-nginx"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/30-ingress-nginx.yaml"
+                },
+                "region": {
+                  "startLine": 42
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/30-ingress-nginx.yaml"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/ingress-nginx"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "27804797f88d3d8e"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:ingress-nginx/ingress-nginx"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "sa:monitoring/prometheus can get/list/watch secrets cluster-wide via ClusterRole/prometheus"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/50-monitoring.yaml"
+                },
+                "region": {
+                  "startLine": 39
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/50-monitoring.yaml"
+                },
+                "region": {
+                  "startLine": 22
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/prometheus"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "06a872da0a2be5cb"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:monitoring/prometheus"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS010",
+          "ruleIndex": 9,
+          "level": "error",
+          "message": {
+            "text": "sa:platform/cert-approver can create certificatesigningrequests and update certificatesigningrequests/approval cluster-wide via ClusterRole/csr-automation; also holds approve on the kube-apiserver-client signer, so it can mint client certificates for any identity including system:masters"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 73
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 57
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/csr-automation"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "8340ba83d24eb028"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:platform/cert-approver"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS011",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "sa:platform/webhook-manager can create/update/patch mutatingwebhookconfigurations cluster-wide via ClusterRole/webhook-manager"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 101
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 92
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/webhook-manager"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "4cd4d429ffddc5a4"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "sa:platform/webhook-manager"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS013",
+          "ruleIndex": 12,
+          "level": "error",
+          "message": {
+            "text": "ClusterRoleBinding/anonymous-status grants ClusterRole/public-status to unauthenticated (anonymous) requests cluster-wide"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 39
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 25
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/public-status"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "761e52c31a583157"
+          },
+          "properties": {
+            "security-severity": "9.5",
+            "severity": "critical",
+            "subjects": [
+              "group:system:unauthenticated"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS003",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "user:carol can bind clusterroles cluster-wide via ClusterRole/rbac-manager (limited to resourceNames [view, edit])"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/rbac-manager"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "034291fbbac87c19"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:carol"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS004",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "user:alice can impersonate serviceaccounts in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 40
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "9097eb1ccb47b4fe"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:alice"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS004",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "sa:dev/default can impersonate serviceaccounts in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "a15fc4c444637543"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS005",
+          "ruleIndex": 4,
+          "level": "error",
+          "message": {
+            "text": "user:alice can create pods, create/update/patch deployments, statefulsets, daemonsets, replicasets, jobs, cronjobs, replicationcontrollers in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit); reachable service accounts: default"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 40
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "19a73d4670473abd"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:alice"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS005",
+          "ruleIndex": 4,
+          "level": "error",
+          "message": {
+            "text": "sa:dev/default can create pods, create/update/patch deployments, statefulsets, daemonsets, replicasets, jobs, cronjobs, replicationcontrollers in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit); reachable service accounts: default"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "6fe83dd6ce6d5a12"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS006",
+          "ruleIndex": 5,
+          "level": "error",
+          "message": {
+            "text": "group:sre-oncall can create pods/exec in namespace kube-system via Role/kube-system/debug-exec"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/20-kube-system.yaml"
+                },
+                "region": {
+                  "startLine": 60
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/20-kube-system.yaml"
+                },
+                "region": {
+                  "startLine": 47
+                }
+              },
+              "message": {
+                "text": "role Role/kube-system/debug-exec"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "0d29f13840c26760"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "group:sre-oncall"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS006",
+          "ruleIndex": 5,
+          "level": "error",
+          "message": {
+            "text": "sa:ci/gitlab-runner can create pods/exec, create pods/attach in namespace ci via Role/ci/gitlab-runner"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 17
+                }
+              },
+              "message": {
+                "text": "role Role/ci/gitlab-runner"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "e33f3660fd8ff277"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:ci/gitlab-runner"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS006",
+          "ruleIndex": 5,
+          "level": "error",
+          "message": {
+            "text": "user:alice can create/get pods/exec, create/get pods/attach in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 40
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "c844ba38b1011ca0"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:alice"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS006",
+          "ruleIndex": 5,
+          "level": "error",
+          "message": {
+            "text": "sa:dev/default can create/get pods/exec, create/get pods/attach in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "7e0e05d025804350"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "sa:ingress-nginx/ingress-nginx can get secrets in namespace ingress-nginx via Role/ingress-nginx/ingress-nginx"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/30-ingress-nginx.yaml"
+                },
+                "region": {
+                  "startLine": 72
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/30-ingress-nginx.yaml"
+                },
+                "region": {
+                  "startLine": 55
+                }
+              },
+              "message": {
+                "text": "role Role/ingress-nginx/ingress-nginx"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "06c927b5e20c6f06"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:ingress-nginx/ingress-nginx"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "sa:ci/gitlab-runner can get/list/watch secrets in namespace ci via Role/ci/gitlab-runner"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 17
+                }
+              },
+              "message": {
+                "text": "role Role/ci/gitlab-runner"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "1c4702f0adcde735"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:ci/gitlab-runner"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "user:alice can get/list/watch secrets in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 40
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "22a6270f9100de47"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:alice"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "sa:dev/default can get/list/watch secrets in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "13508464cbaea341"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS009",
+          "ruleIndex": 8,
+          "level": "error",
+          "message": {
+            "text": "user:alice can create serviceaccounts/token in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 40
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "eed5d436b34ee911"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "user:alice"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS009",
+          "ruleIndex": 8,
+          "level": "error",
+          "message": {
+            "text": "sa:dev/default can create serviceaccounts/token in namespace dev via ClusterRole/edit (rule aggregated from ClusterRole/system:aggregate-to-edit)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 29
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "c2b5cb8ea125be25"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS011",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "sa:platform/webhook-manager can create/update/patch validatingwebhookconfigurations cluster-wide via ClusterRole/webhook-manager"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 101
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 92
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/webhook-manager"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "0194554df10cae29"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:platform/webhook-manager"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS012",
+          "ruleIndex": 11,
+          "level": "error",
+          "message": {
+            "text": "sa:platform/storage-provisioner can create persistentvolumes cluster-wide via ClusterRole/pv-provisioner; a hostPath PersistentVolume exposes node filesystems"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 132
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 120
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/pv-provisioner"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "c0a21c8db0e55f6d"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:platform/storage-provisioner"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS013",
+          "ruleIndex": 12,
+          "level": "error",
+          "message": {
+            "text": "ClusterRoleBinding/all-users-configmaps grants ClusterRole/configmap-reader to every authenticated identity, including every service account cluster-wide"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 77
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 58
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/configmap-reader"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "adc9f85100353852"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "group:system:authenticated"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS017",
+          "ruleIndex": 16,
+          "level": "error",
+          "message": {
+            "text": "Pod/kube-system/bootstrap-agent-0 runs as sa:kube-system/cluster-bootstrap, which is cluster-admin-equivalent, with its token automounted. The pod is also privileged or mounts hostPath volumes."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/20-kube-system.yaml"
+                },
+                "region": {
+                  "startLine": 32
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "23bed816eca46356"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:kube-system/cluster-bootstrap"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS017",
+          "ruleIndex": 16,
+          "level": "error",
+          "message": {
+            "text": "CronJob/ci/nightly-deploy runs as sa:ci/deployer, which is cluster-admin-equivalent, with its token automounted."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 75
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "37181ae807e9f3f4"
+          },
+          "properties": {
+            "security-severity": "8.0",
+            "severity": "high",
+            "subjects": [
+              "sa:ci/deployer"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS002",
+          "ruleIndex": 1,
+          "level": "warning",
+          "message": {
+            "text": "ClusterRoleBinding/all-users-configmaps grants group:system:authenticated wildcard rules cluster-wide via ClusterRole/configmap-reader: apiGroups in {verbs=get apiGroups=* resources=*/status}"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 77
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 58
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/configmap-reader"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "39629474ce30f738"
+          },
+          "properties": {
+            "security-severity": "5.5",
+            "severity": "medium",
+            "subjects": [
+              "group:system:authenticated"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS009",
+          "ruleIndex": 8,
+          "level": "warning",
+          "message": {
+            "text": "sa:platform/token-broker can create serviceaccounts/token in namespace platform via Role/platform/token-broker (limited to resourceNames [build-bot])"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 169
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/80-platform.yaml"
+                },
+                "region": {
+                  "startLine": 158
+                }
+              },
+              "message": {
+                "text": "role Role/platform/token-broker"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "89f4b899d5ee13e2"
+          },
+          "properties": {
+            "security-severity": "5.5",
+            "severity": "medium",
+            "subjects": [
+              "sa:platform/token-broker"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS014",
+          "ruleIndex": 13,
+          "level": "warning",
+          "message": {
+            "text": "sa:dev/default has permissions (RoleBinding/dev/default-sa-edit -> ClusterRole/edit) and its token is automounted into Deployment/dev/legacy-web"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 68
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/60-dev.yaml"
+                },
+                "region": {
+                  "startLine": 54
+                }
+              },
+              "message": {
+                "text": "RoleBinding/dev/default-sa-edit"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "6965313cec6eae3e"
+          },
+          "properties": {
+            "security-severity": "5.5",
+            "severity": "medium",
+            "subjects": [
+              "sa:dev/default"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS008",
+          "ruleIndex": 7,
+          "level": "note",
+          "message": {
+            "text": "sa:payments/payments-api can get secrets in namespace payments via Role/payments/payments-api (limited to resourceNames [payments-db])"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/70-payments.yaml"
+                },
+                "region": {
+                  "startLine": 37
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/70-payments.yaml"
+                },
+                "region": {
+                  "startLine": 23
+                }
+              },
+              "message": {
+                "text": "role Role/payments/payments-api"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "138a53308fd5e9ee"
+          },
+          "properties": {
+            "security-severity": "3.0",
+            "severity": "low",
+            "subjects": [
+              "sa:payments/payments-api"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS016",
+          "ruleIndex": 15,
+          "level": "note",
+          "message": {
+            "text": "RoleBinding/legacy/legacy-app-reader references ClusterRole/legacy-app-reader, which does not exist in the input; subjects sa:legacy/legacy-app would receive whatever a future role of that name grants"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/90-legacy.json"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "dcaae42a7d5eb87e"
+          },
+          "properties": {
+            "security-severity": "3.0",
+            "severity": "low",
+            "subjects": [
+              "sa:legacy/legacy-app"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS015",
+          "ruleIndex": 14,
+          "level": "note",
+          "message": {
+            "text": "ClusterRoleBinding/cluster-admin binds ClusterRole/cluster-admin cluster-wide to group:system:masters"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 166
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/cluster-admin"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "0492e7c145462352"
+          },
+          "properties": {
+            "security-severity": "1.0",
+            "severity": "info",
+            "subjects": [
+              "group:system:masters"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS015",
+          "ruleIndex": 14,
+          "level": "note",
+          "message": {
+            "text": "ClusterRoleBinding/cluster-bootstrap-admin binds ClusterRole/cluster-admin cluster-wide to sa:kube-system/cluster-bootstrap"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/20-kube-system.yaml"
+                },
+                "region": {
+                  "startLine": 19
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/cluster-admin"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "960aa08ded0499c1"
+          },
+          "properties": {
+            "security-severity": "1.0",
+            "severity": "info",
+            "subjects": [
+              "sa:kube-system/cluster-bootstrap"
+            ]
+          }
+        },
+        {
+          "ruleId": "RS015",
+          "ruleIndex": 14,
+          "level": "note",
+          "message": {
+            "text": "ClusterRoleBinding/ci-deployer-cluster-admin binds ClusterRole/cluster-admin cluster-wide to sa:ci/deployer"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/40-ci.yaml"
+                },
+                "region": {
+                  "startLine": 47
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "id": 1,
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "testdata/cluster/10-builtin-rbac.yaml"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              },
+              "message": {
+                "text": "role ClusterRole/cluster-admin"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "rbacscope/v1": "dd18919338f01cd1"
+          },
+          "properties": {
+            "security-severity": "1.0",
+            "severity": "info",
+            "subjects": [
+              "sa:ci/deployer"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
