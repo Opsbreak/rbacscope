@@ -47,11 +47,13 @@ jobs:
       - name: smoke test against fixture
         shell: bash
         run: |
-          go run ./cmd/rbacscope audit -f testdata/cluster --min-severity high
-          go run ./cmd/rbacscope paths -f testdata/cluster -o mermaid
+          # Build a real binary: `go run` reports any non-zero program exit as 1.
+          go build -o "$RUNNER_TEMP/bin/" ./cmd/rbacscope
+          "$RUNNER_TEMP/bin/rbacscope" audit -f testdata/cluster --min-severity high
+          "$RUNNER_TEMP/bin/rbacscope" paths -f testdata/cluster -o mermaid
           # The fixture is deliberately insecure: --fail-on must trip with exit code 3.
           set +e
-          go run ./cmd/rbacscope audit -f testdata/cluster --fail-on critical -q > /dev/null
+          "$RUNNER_TEMP/bin/rbacscope" audit -f testdata/cluster --fail-on critical -q > /dev/null
           code=$?
           set -e
           test "$code" -eq 3
